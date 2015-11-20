@@ -2,6 +2,8 @@
 
 set -e
 
+travis=
+
 die()
 {
     echo $@
@@ -12,10 +14,10 @@ get()
 {
     key=$1
 
-    cat .travis.yml | shyaml get-values $key 2> /dev/null
+    echo "$travis" | shyaml get-values $key 2> /dev/null
     if [ $? != 0 ]
     then
-        cat .travis.yml | shyaml get-value $key 2> /dev/null
+        echo "$travis" | shyaml get-value $key 2> /dev/null
     fi
 }
 
@@ -70,6 +72,8 @@ execute()
 }
 
 test -e .travis.yml || die 'No .travis.yml script'
+
+travis=$(cat .travis.yml)
 
 execute "services" \
     && execute "before_install" \
