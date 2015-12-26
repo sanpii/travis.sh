@@ -1,3 +1,6 @@
+env:
+    - TRAVIS_TEST=1
+
 before_install:
     - echo before_install
 
@@ -6,4 +9,6 @@ install: echo install
 before_script:
     - echo before_script
 
-script: echo script
+script:
+    - if [ ! $TRAVIS_TEST ]; then exit 1; fi
+    - echo script

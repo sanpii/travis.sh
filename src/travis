@@ -56,10 +56,14 @@ execute()
     IFS=$'\n'
     for command in $commands
     do
-        if [ "$1" == "services" ]
-        then
-            command="sudo rc-service $command start"
-        fi
+        case "$1" in
+            "services")
+                command="sudo rc-service $command start"
+            ;;
+            "env" )
+                command="export $command"
+            ;;
+        esac
 
         execute_command "$command"
 
@@ -75,6 +79,7 @@ test -e .travis.yml || die 'No .travis.yml script'
 readonly TRAVIS=$(cat .travis.yml)
 
 execute "services" \
+    && execute "env" \
     && execute "before_install" \
     && execute "install" \
     && execute "before_script" \
