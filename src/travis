@@ -58,7 +58,7 @@ execute()
     do
         case "$1" in
             "services")
-                command="sudo rc-service $command start"
+                command="sudo service $command start"
             ;;
             "env" )
                 command="export $command"
