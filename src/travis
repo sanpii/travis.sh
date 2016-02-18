@@ -77,18 +77,31 @@ execute()
 
 main()
 {
-    execute "services" \
-        && execute "env" \
-        && execute "before_install" \
-        && execute "install" \
-        && execute "before_script" \
-        && execute "script" \
-        && execute "after_success" \
-        && execute "before_deploy" \
-        && execute "deploy" \
-        && execute "after_deploy" \
-        && execute "after_script" \
-        || execute "after_failure"
+    local actions=( \
+        "services" \
+        "env" \
+        "before_install" \
+        "install" \
+        "before_script" \
+        "script" \
+        "after_success" \
+        "before_deploy" \
+        "deploy" \
+        "after_deploy" \
+        "after_script" \
+    )
+
+    for action in "${actions[@]}"
+    do
+        execute "$action"
+        local status=$?
+
+        if [ $status -ne 0 ]
+        then
+            execute "after_failure"
+            return $status
+        fi
+    done
 }
 
 test -e .travis.yml || die 'No .travis.yml script'
