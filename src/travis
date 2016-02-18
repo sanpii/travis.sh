@@ -75,19 +75,25 @@ execute()
 
 main()
 {
-    local actions=( \
-        "services" \
-        "env" \
-        "before_install" \
-        "install" \
-        "before_script" \
-        "script" \
-        "after_success" \
-        "before_deploy" \
-        "deploy" \
-        "after_deploy" \
-        "after_script" \
-    )
+    if [ $# -gt 0 ]
+    then
+        local actions=($1)
+        shift
+    else
+        local actions=( \
+            "services" \
+            "env" \
+            "before_install" \
+            "install" \
+            "before_script" \
+            "script" \
+            "after_success" \
+            "before_deploy" \
+            "deploy" \
+            "after_deploy" \
+            "after_script" \
+        )
+    fi
 
     for action in "${actions[@]}"
     do
@@ -106,4 +112,4 @@ test -e .travis.yml || die 'No .travis.yml script'
 
 readonly TRAVIS=$(cat .travis.yml)
 
-main
+main $@
