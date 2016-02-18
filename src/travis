@@ -66,27 +66,33 @@ execute()
         esac
 
         execute_command "$command"
+        local status=$?
 
-        if [ $? != 0 ]
+        if [ $status -ne 0 ]
         then
             return $status
         fi
     done
 }
 
+main()
+{
+    execute "services" \
+        && execute "env" \
+        && execute "before_install" \
+        && execute "install" \
+        && execute "before_script" \
+        && execute "script" \
+        && execute "after_success" \
+        && execute "before_deploy" \
+        && execute "deploy" \
+        && execute "after_deploy" \
+        && execute "after_script" \
+        || execute "after_failure"
+}
+
 test -e .travis.yml || die 'No .travis.yml script'
 
 readonly TRAVIS=$(cat .travis.yml)
 
-execute "services" \
-    && execute "env" \
-    && execute "before_install" \
-    && execute "install" \
-    && execute "before_script" \
-    && execute "script" \
-    && execute "after_success" \
-    && execute "before_deploy" \
-    && execute "deploy" \
-    && execute "after_deploy" \
-    && execute "after_script" \
-    || execute "after_failure"
+main
