@@ -2,6 +2,8 @@
 
 main()
 {
+    setup_env
+
     if [ $# -gt 0 ]
     then
         local actions=($1)
@@ -33,6 +35,32 @@ main()
             return $status
         fi
     done
+}
+
+setup_env()
+{
+    export CI=true \
+        TRAVIS=true \
+        CONTINUOUS_INTEGRATION=true \
+        DEBIAN_FRONTEND='noninteractive' \
+        RAILS_ENV=test \
+        RACK_ENV=test \
+        MERB_ENV=test \
+        JRUBY_OPTS='--server -Dcext.enabled=false -Xcompile.invokedynamic=false'
+
+    export TRAVIS_BRANCH=$(git rev-parse --abbrev-ref HEAD) \
+        TRAVIS_BUILD_DIR=$(pwd) \
+        TRAVIS_BUILD_ID=0 \
+        TRAVIS_BUILD_NUMBER=0 \
+        TRAVIS_COMMIT=$(git rev-parse HEAD) \
+        TRAVIS_COMMIT_RANGE=$(git rev-parse HEAD~)..$(git rev-parse HEAD) \
+        TRAVIS_EVENT_TYPE='cli' \
+        TRAVIS_JOB_ID=0 \
+        TRAVIS_OS_NAME='linux' \
+        TRAVIS_PULL_REQUEST=false \
+        TRAVIS_REPO_SLUG=$(git ls-remote --get-url origin | cut -d : -f 2 | sed 's/.git$//') \
+        TRAVIS_SECURE_ENV_VARS=false \
+        TRAVIS_TAG=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 }
 
 execute()
@@ -95,10 +123,10 @@ get()
 {
     local key=$1
 
-    echo "$TRAVIS" | shyaml get-values $key 2> /dev/null
+    echo "$TRAVIS_CONFIG" | shyaml get-values $key 2> /dev/null
     if [ $? != 0 ]
     then
-        echo "$TRAVIS" | shyaml get-value $key 2> /dev/null
+        echo "$TRAVIS_CONFIG" | shyaml get-value $key 2> /dev/null
     fi
 }
 
@@ -110,6 +138,6 @@ die()
 
 test -e .travis.yml || die 'No .travis.yml script'
 
-readonly TRAVIS=$(cat .travis.yml)
+readonly TRAVIS_CONFIG=$(cat .travis.yml)
 
 main $@
